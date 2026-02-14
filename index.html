@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Para Ti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #F5E6D3;
+            font-family: 'Great Vibes', 'Brush Script MT', cursive;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            color: #5D4037;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .tree-container {
+            position: relative;
+            width: 360px; /* Un poco más ancho para el nuevo tamaño */
+            height: 420px; /* Más alto para el corazón gigante */
+            margin-bottom: 0px;
+        }
+
+        /* --- NUEVO DISEÑO DE TRONCO ORGÁNICO --- */
+        .trunk {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 22px; /* Base más ancha */
+            height: 140px;
+            /* Degradado más rico y oscuro para textura de madera vieja */
+            background: linear-gradient(to right, #3E2723, #5D4037, #795548, #5D4037, #3E2723);
+            /* Forma cónica orgánica usando radios de borde complejos */
+            border-radius: 15% 15% 40% 40% / 5% 5% 20% 20%;
+            z-index: 1;
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Base del tronco simulando raíces */
+        .trunk::after {
+             content: '';
+             position: absolute;
+             bottom: -8px;
+             left: -30%;
+             width: 160%;
+             height: 25px;
+             background: inherit;
+             border-radius: 50% 50% 20% 20%;
+             z-index: -1;
+        }
+        
+        /* SE HAN ELIMINADO LAS RAMAS (.trunk::before y .trunk::after originales) */
+
+        /* --- Estilos de los Corazones --- */
+        .heart {
+            position: absolute;
+            width: 13px; 
+            height: 13px;
+            background-color: #D32F2F;
+            transform: rotate(-45deg);
+            opacity: 0.9;
+            z-index: 2;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.15);
+            will-change: transform, opacity;
+        }
+
+        .heart::before, .heart::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: inherit;
+        }
+        .heart::before { top: -50%; left: 0; }
+        .heart::after { top: 0; left: 50%; }
+
+        /* Animación 1: Mecido suave en el árbol */
+        @keyframes sway {
+            0%, 100% { transform: rotate(-45deg) translate(0, 0); }
+            50% { transform: rotate(-50deg) translate(-1px, -2px); }
+        }
+
+        /* Animación 2: Volando con el viento */
+        @keyframes flyAway {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) rotate(-45deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                /* Termina más lejos y más grande antes de desaparecer */
+                transform: translate(450px, -150px) rotate(400deg) scale(0.1);
+            }
+        }
+
+        .main-text {
+            font-size: 3.8rem;
+            z-index: 10;
+            margin-top: -40px; /* Ajustado para el nuevo tamaño del árbol */
+            margin-bottom: 25px;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(255,255,255,0.5);
+        }
+
+        .counter-wrapper {
+            text-align: center;
+            font-family: 'Lato', sans-serif;
+            color: #8D6E63;
+            padding: 0 20px;
+        }
+
+        .counter-number {
+            display: block;
+            font-size: 3rem;
+            font-weight: bold;
+            color: #C62828;
+            font-family: 'Great Vibes', cursive;
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .counter-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tree-container" id="tree">
+        <div class="trunk"></div>
+    </div>
+
+    <div class="main-text">Te Amo</div>
+
+    <div class="counter-wrapper">
+        <span class="counter-number" id="counter">1,167</span>
+        <div class="counter-label">días desde que nuestras miradas se enlazaron</div>
+    </div>
+
+    <script>
+        (function() {
+            const treeContainer = document.getElementById('tree');
+            const colors = ['#D32F2F', '#E91E63', '#C2185B', '#FF5252', '#F48FB1', '#AD1457', '#B71C1C', '#880E4F'];
+            
+            const numberOfHearts = 320; // Unos pocos más para llenar el espacio extra
+            const centerX = 180; // Centro ajustado al nuevo ancho del contenedor
+            const centerY = 155; // Bajamos el centro para que el corazón gigante quepa bien
+            
+            // CAMBIO IMPORTANTE: Escala aumentada para un corazón más grande
+            const scale = 9.5; 
+
+            for (let i = 0; i < numberOfHearts; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('heart');
+                
+                // --- MATEMÁTICA DE CORAZÓN ---
+                let t = Math.random() * Math.PI * 2;
+                let heartX = 16 * Math.pow(Math.sin(t), 3);
+                let heartY = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+
+                // Dispersión
+                let scatter = Math.sqrt(Math.random());
+
+                let finalX = centerX + (heartX * scale * scatter);
+                let finalY = centerY - (heartY * scale * scatter);
+
+                heart.style.left = (finalX - 6.5) + 'px';
+                heart.style.top = (finalY - 6.5) + 'px';
+                heart.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // --- ANIMACIÓN ---
+                // Aumentamos ligeramente la probabilidad de volar al 22%
+                const isFlyer = Math.random() < 0.22; 
+
+                if (isFlyer) {
+                    const duration = 9 + Math.random() * 11; 
+                    const delay = Math.random() * 15;
+                    // Usamos 'forwards' para que no desaparezcan de golpe al final del ciclo
+                    heart.style.animation = `flyAway ${duration}s cubic-bezier(0.3, 0.1, 0.3, 1) ${delay}s infinite normal forwards`;
+                } else {
+                    const sizeVar = 0.6 + Math.random() * 0.7;
+                    const duration = 3 + Math.random() * 4;
+                    const delay = Math.random() * 4;
+                    heart.style.transform = `scale(${sizeVar}) rotate(-45deg)`;
+                    heart.style.animation = `sway ${duration}s ease-in-out ${delay}s infinite alternate`;
+                }
+
+                treeContainer.appendChild(heart);
+            }
+
+            // --- CONTADOR ---
+            const counterElement = document.getElementById('counter');
+            const end = 1167;
+            const duration = 2500;
+            const startTime = performance.now();
+
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 4);
+                
+                const currentVal = Math.floor(ease * end);
+                counterElement.innerText = currentVal.toLocaleString();
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    counterElement.innerText = "1,167";
+                }
+            }
+            requestAnimationFrame(updateCounter);
+        })();
+    </script>
+</body>
+</html>
